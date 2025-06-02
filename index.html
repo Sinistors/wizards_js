@@ -4,10 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <script src="script.js"></script>
+    <script src="script.js" defer></script>
     <title>Wizard Battle</title>
 </head>
 <body>
-    
+    <h1>Wizard battle</h1>
+    <div class="d-flex">
+        <div id="player1">
+            <div>
+                <label for="name">Nom sorcier 1</label>
+                <input type="text" data-type="name">
+            </div>
+            <div>
+                <label for="house">Maison</label>
+                <select name="houses" data-type="house">
+                    <option value="Gryffondor">Gryffondor</option>
+                    <option value="Poufsouffle">Poufsouffle</option>
+                    <option value="Serdaigle">Serdaigle</option>
+                    <option value="Serpentard">Serpentard</option>
+                </select>
+            </div>
+        </div>
+        <div id="player2">
+            <div>
+                <label for="name">Nom sorcier 2</label>
+                <input type="text" data-type="name">
+            </div>
+            <div>
+                <label for="house">Maison</label>
+                <select name="houses" data-type="house">
+                    <option value="Gryffondor">Gryffondor</option>
+                    <option value="Poufsouffle">Poufsouffle</option>
+                    <option value="Serdaigle">Serdaigle</option>
+                    <option value="Serpentard">Serpentard</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <button id="startBtn">Lancer le duel</button>
+
+    <div id="fightDiv">
+
+    </div>
 </body>
 </html>
