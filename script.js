@@ -9,6 +9,7 @@ function randomize(number, percentOfRandom)
     return number + (random / 100 * number);
 }
 
+
 class Wizard 
 {
     id;
@@ -24,6 +25,7 @@ class Wizard
 
     hudElement;
     barElement;
+    hasSkull = false;
 
 
     constructor(playerId) 
@@ -67,6 +69,7 @@ class Wizard
     updateHUD()
     {
         let bar = this.barElement.querySelector("div");
+        console.log(this.barElement);
         bar.style.width = this.hp / this.hpMax * 100 + "%";
 
         bar.classList = "";
@@ -84,13 +87,18 @@ class Wizard
             bar.classList.add("bg-red");
         }
 
-        if (this.hp == 0)
+        if (this.hp == 0 && !this.hasSkull)
         {
             let deadSymbol = document.createElement("img");
             deadSymbol.src = "Images/human-skull.png";
             deadSymbol.style.width = "50px";
             this.hudElement.append(deadSymbol);
+            this.hasSkull = true;
         }
+    }
+    playTurn(allies, enemies)
+    {
+        return this.attack(enemies[randomRange(0, enemies.length)]);
     }
 
     attack(wizard) 
@@ -109,7 +117,12 @@ class Wizard
         {
             wizard.hp = 0;
         }
-        atkStr += "Il lui reste " + wizard.hp.toFixed(2) + " PV";
+        atkStr += "Il lui reste " + wizard.hp.toFixed(2) + " PV. ";
+
+        if (wizard.isDead())
+        {
+            atkStr += wizard.name + " est mort !";
+        }
 
         return atkStr;
     }
@@ -126,79 +139,190 @@ class Wizard
         this.hudElement = document.querySelector("#" + this.id + "HUD");
         this.barElement = document.querySelector("#" + this.id + "Bar");
     }
+
+    isDead()
+    {
+        return (this.hp <= 0);
+    }
+}
+
+class Fight
+{
+    //Team 
+    goodGuys;
+    badGuys;
+
+    //Display
+    fightDiv;
+    hud;
+    goodHUD;
+    badHUD;
+    historicDiv;
+
+    constructor(team1, team2)
+    {
+        this.goodGuys = team1;
+        this.badGuys = team2;
+    }
+
+    init()
+    {
+        this.fightDiv = document.querySelector("#fightDiv");
+
+        this.hud = document.createElement("div");
+        this.hud.classList.add("d-flex");
+
+        this.goodHUD = document.createElement("div");
+        this.goodHUD.classList.add("column-flex");
+        this.badHUD = document.createElement("div");
+        this.badHUD.classList.add("column-flex");
+
+        this.hud.append(this.goodHUD);
+        this.hud.append(this.badHUD);
+
+        this.goodGuys.forEach(guy => 
+        {
+            this.goodHUD.append(guy.initHUD());    
+        });
+        this.badGuys.forEach(guy => 
+        {
+            this.badHUD.append(guy.initHUD());    
+        });
+
+        this.fightDiv.append(this.hud);
+
+        
+        
+        this.fightDiv.innerHTML += "<h2>Historique du duel :</h2>";
+        
+        this.historicDiv = document.createElement("div");
+        this.fightDiv.append(this.historicDiv);
+
+        this.goodGuys.forEach(guy => 
+        {
+            guy.getElementsHUD();    
+        });
+        this.badGuys.forEach(guy => 
+        {
+            guy.getElementsHUD();   
+        });
+    }
+
+
+    async gameloop()
+    {
+        while (!this.isTeamDead(this.goodGuys) && !this.isTeamDead(this.badGuys))
+        {
+            for (let i = 0; i < goodGuys.length(); i++)
+            {
+
+            }
+            this.goodGuys.forEach(player => 
+            {
+                if(!player.isDead())
+                {
+                    let historic = document.createElement("p");
+                    historic.innerText = player.playTurn(this.goodGuys, this.badGuys);
+                    this.historicDiv.prepend(historic);
+                }
+            });
+            this.badGuys.forEach(player => 
+            {
+                if(!player.isDead())
+                {
+                    let historic = document.createElement("p");
+                    historic.innerText = player.playTurn(this.badGuys, this.goodGuys);
+                    this.historicDiv.prepend(historic);
+                }
+            });
+
+            this.goodGuys.forEach(player => 
+            {
+                player.updateHUD();
+            });
+            this.badGuys.forEach(player => 
+            {
+                player.updateHUD();
+            });
+
+            await sleep(500);
+        }
+    }
+
+    isTeamDead(players)
+    {
+        let isDead = true;
+        players.forEach(player => 
+        {
+            if (!player.isDead())
+            {
+                isDead = false;
+            }
+        });
+        return isDead;
+    }
+
+    finish()
+    {
+        let element = document.createElement("p");
+        if (this.isTeamDead(this.goodGuys))
+        {
+            element.innerText = "Les méchants ont gagnés !";
+        }
+        else
+        {
+            element.innerText = "Les gentils ont gagnés !";
+        }
+        this.historicDiv.prepend(element);
+    }
 }
 
 
 document.querySelector("#startBtn").addEventListener("click", async () => 
 {
-    let wizard1 = new Wizard("player1");
-    let wizard2 = new Wizard("player2");
-
-
-    let fight = document.querySelector("#fightDiv");
-    fight.innerHTML = "";
-
-    let hud = document.createElement("div");
-    hud.classList.add("d-flex");
-    hud.append(wizard1.initHUD());
-    hud.append(wizard2.initHUD());
-    fight.append(hud);
-
-    fight.innerHTML += "<h2>Historique du duel :</h2>";
-
-    let historicDiv = document.createElement("div");
-    fight.append(historicDiv);
-
-    wizard1.getElementsHUD();
-    wizard2.getElementsHUD();
-    let turn = 0;
-    let random = randomRange(1,2)-1;
-    while (wizard1.hp > 0 && wizard2.hp > 0) 
+    let goodGuys = document.querySelector("#goodGuys");
+    let goodPlayerElements = goodGuys.querySelectorAll("div[data-type='player']");
+    let goodPlayers = [];
+    console.log(goodPlayerElements);
+    goodPlayerElements.forEach(element => 
     {
-        let historic = document.createElement("p");
-        if ((turn + random) % 2 == 0) 
-        {
-            if ((wizard1.hp / wizard1.hpMax) < 0.5 && !wizard1.isHealed)
-            {
-                historic.innerHTML = wizard1.heal();
-            }
-            else
-            {
-                historic.innerHTML = wizard1.attack(wizard2);
-            }
-        } 
-        else 
-        {
-            if ((wizard2.hp / wizard2.hpMax) < 0.5 && !wizard2.isHealed)
-            {
-                historic.innerHTML = wizard2.heal();
-            }
-            else
-            {
-                historic.innerHTML = wizard2.attack(wizard1);
-            }
-        }
-        historicDiv.prepend(historic);
-
-        wizard1.updateHUD();
-        wizard2.updateHUD();
-
-
-
-        turn++;
-        await sleep(1000);
-    }
-
-    let deadPlayerName;
-    if (wizard1.hp <= 0)
+        goodPlayers.push(new Wizard(element.id));
+    });
+    let badPlayerElements = document.querySelector("#badGuys").querySelectorAll("div[data-type='player']");
+    let badPlayers = [];
+    badPlayerElements.forEach(element => 
     {
-        deadPlayerName = wizard1.name;
-    }
-    else if(wizard2.hp <= 0)
-    {
-        deadPlayerName = wizard2.name;
-    }
-    const resultElement = document.createElement("p");
-    resultElement.innerText = deadPlayerName + " est mort !";
-    historicDiv.prepend(resultElement);
+        badPlayers.push(new Wizard(element.id));
+    });
+
+    let fight = new Fight(goodPlayers, badPlayers);
+
+    fight.init();
+
+    fight.gameloop();
+
+    fight.finish();
+});
+
+let playerStartId = 10;
+function addPlayer(btn) 
+{
+    let newElement = document.createElement("div");
+    newElement.id = "player" + playerStartId;
+    newElement.setAttribute("data-type", "player");
+    newElement.innerHTML = "<div><label for='name'>Nom</label><input type='text' data-type='name'></div><div><label for='house'>Maison</label><select name='houses' data-type='house'><option value='Gryffondor'>Gryffondor</option><option value='Poufsouffle'>Poufsouffle</option><option value='Serdaigle'>Serdaigle</option><option value='Serpentard'>Serpentard</option></select></div><div><label for='hp'>HP</label><input type='number' data-type='hp'></div><div><label for='strengh'>Force</label><input type='number' data-type='strength'></div><div><label for='random'>Aléatoire (en %)</label><input type='number' data-type='random'></div><div><label for='crit'>Chance de coup critique (en %)</label><input type='number' data-type='crit'></div><div><label for='heal'>Quantité de soin</label><input type='number' data-type='heal'></div>"
+    playerStartId++;
+    btn.insertAdjacentElement('beforebegin', newElement);
+}
+
+let goodBtn = document.querySelector("#addGoodBtn");
+goodBtn.addEventListener("click", () =>
+{
+    addPlayer(goodBtn);
+});
+
+let badBtn = document.querySelector("#addBadBtn");
+badBtn.addEventListener("click", () =>
+{
+    addPlayer(badBtn);
 });
