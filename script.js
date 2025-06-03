@@ -8,6 +8,15 @@ function randomize(number, percentOfRandom)
     let random = Math.random() * (percentOfRandom * 2) - percentOfRandom;
     return number + (random / 100 * number);
 }
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+
+        let temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+}
 
 
 class Wizard 
@@ -213,10 +222,6 @@ class Fight
     {
         while (!this.isTeamDead(this.goodGuys) && !this.isTeamDead(this.badGuys))
         {
-            for (let i = 0; i < goodGuys.length(); i++)
-            {
-
-            }
             this.goodGuys.forEach(player => 
             {
                 if(!player.isDead())
@@ -310,7 +315,7 @@ function addPlayer(btn)
     let newElement = document.createElement("div");
     newElement.id = "player" + playerStartId;
     newElement.setAttribute("data-type", "player");
-    newElement.innerHTML = "<div><label for='name'>Nom</label><input type='text' data-type='name'></div><div><label for='house'>Maison</label><select name='houses' data-type='house'><option value='Gryffondor'>Gryffondor</option><option value='Poufsouffle'>Poufsouffle</option><option value='Serdaigle'>Serdaigle</option><option value='Serpentard'>Serpentard</option></select></div><div><label for='hp'>HP</label><input type='number' data-type='hp'></div><div><label for='strengh'>Force</label><input type='number' data-type='strength'></div><div><label for='random'>Aléatoire (en %)</label><input type='number' data-type='random'></div><div><label for='crit'>Chance de coup critique (en %)</label><input type='number' data-type='crit'></div><div><label for='heal'>Quantité de soin</label><input type='number' data-type='heal'></div>"
+    newElement.innerHTML = "<div><label for='name'>Nom</label><input type='text' data-type='name' value='Gobelin'></div><div><label for='house'>Maison</label><select name='houses' data-type='house'><option value='Gryffondor'>Gryffondor</option><option value='Poufsouffle'>Poufsouffle</option><option value='Serdaigle'>Serdaigle</option><option value='Serpentard'>Serpentard</option></select></div><div><label for='hp'>HP</label><input type='number' data-type='hp' value='100'></div><div><label for='strengh'>Force</label><input type='number' data-type='strength' value='10'></div><div><label for='random'>Aléatoire (en %)</label><input type='number' data-type='random' value='50'></div><div><label for='crit'>Chance de coup critique (en %)</label><input type='number' data-type='crit' value='10'></div><div><label for='heal'>Quantité de soin</label><input type='number' data-type='heal' value='50'></div>"
     playerStartId++;
     btn.insertAdjacentElement('beforebegin', newElement);
 }
