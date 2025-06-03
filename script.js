@@ -11,6 +11,7 @@ function randomize(number, percentOfRandom)
 
 class Wizard 
 {
+    id;
     name;
     house;
     hpMax;
@@ -21,8 +22,13 @@ class Wizard
     healAmount;
     isHealed = false;
 
+    hudElement;
+    barElement;
+
+
     constructor(playerId) 
     {
+        this.id = playerId;
         this.name = document.querySelector("#" + playerId + " input[data-type='name']").value;
         this.house = document.querySelector("#" + playerId + " select[data-type='house']").value;
         this.hpMax = document.querySelector("#" + playerId + " input[data-type='hp']").value;
@@ -31,6 +37,60 @@ class Wizard
         this.randomPercent = parseFloat(document.querySelector("#" + playerId + " input[data-type='strength']").value);
         this.critChance = parseFloat(document.querySelector("#" + playerId + " input[data-type='crit']").value);
         this.healAmount = parseFloat(document.querySelector("#" + playerId + " input[data-type='heal']").value);
+    }
+
+    initHUD()
+    {
+        this.hudElement = document.createElement("div");
+        this.hudElement.id = this.id + "HUD";
+        this.hudElement.classList.add("center-text");
+
+        let title = document.createElement("h3");
+        title.innerText = this.name;
+        this.hudElement.append(title);
+
+        let house = document.createElement("p");
+        house.innerText = this.house;
+        this.hudElement.append(house);
+
+        this.barElement = document.createElement("div");
+        this.barElement.id = this.id + "Bar";
+        this.barElement.classList.add("hpBar");
+        let bar = document.createElement("div");
+        this.barElement.append(bar);
+
+
+        this.hudElement.append(this.barElement);
+        return this.hudElement;
+    }
+
+    updateHUD()
+    {
+        let bar = this.barElement.querySelector("div");
+        bar.style.width = this.hp / this.hpMax * 100 + "%";
+
+        bar.classList = "";
+        let hpPercent = this.hp/this.hpMax * 100;
+        if (hpPercent > 50)
+        {
+            bar.classList.add("bg-green");
+        }
+        else if (hpPercent > 20)
+        {
+            bar.classList.add("bg-orange");
+        }
+        else
+        {
+            bar.classList.add("bg-red");
+        }
+
+        if (this.hp == 0)
+        {
+            let deadSymbol = document.createElement("img");
+            deadSymbol.src = "Images/human-skull.png";
+            deadSymbol.style.width = "50px";
+            this.hudElement.append(deadSymbol);
+        }
     }
 
     attack(wizard) 
@@ -61,25 +121,36 @@ class Wizard
         return "<span class='text-green'>" + this.name + " se soigne de " + this.healAmount + " PV. Il a maintenant " + this.hp.toFixed(2) + " PV</span>"; 
     }
 
-
+    getElementsHUD()
+    {
+        this.hudElement = document.querySelector("#" + this.id + "HUD");
+        this.barElement = document.querySelector("#" + this.id + "Bar");
+    }
 }
+
 
 document.querySelector("#startBtn").addEventListener("click", async () => 
 {
-    let wizard1 = new Wizard("player1", 5, 15);
-    let wizard2 = new Wizard("player2", 5, 20);
+    let wizard1 = new Wizard("player1");
+    let wizard2 = new Wizard("player2");
 
 
     let fight = document.querySelector("#fightDiv");
     fight.innerHTML = "";
 
-    fight.innerHTML += "<div class='d-flex center-text'><div><h3>" + wizard1.name + "</h3><p>" + wizard1.house + "</p><div id='hpBar1' class='hpBar'><div></div></div></div><div><h3>" + wizard2.name + "</h3><p>" + wizard2.house + "</p><div id='hpBar2' class='hpBar'><div></div></div></div></div>";
+    let hud = document.createElement("div");
+    hud.classList.add("d-flex");
+    hud.append(wizard1.initHUD());
+    hud.append(wizard2.initHUD());
+    fight.append(hud);
 
     fight.innerHTML += "<h2>Historique du duel :</h2>";
 
     let historicDiv = document.createElement("div");
     fight.append(historicDiv);
 
+    wizard1.getElementsHUD();
+    wizard2.getElementsHUD();
     let turn = 0;
     let random = randomRange(1,2)-1;
     while (wizard1.hp > 0 && wizard2.hp > 0) 
@@ -109,8 +180,8 @@ document.querySelector("#startBtn").addEventListener("click", async () =>
         }
         historicDiv.prepend(historic);
 
-        document.querySelector("#hpBar1 div").style.width = wizard1.hp / wizard1.hpMax * 100 + "%";
-        document.querySelector("#hpBar2 div").style.width = wizard2.hp / wizard2.hpMax * 100 + "%";
+        wizard1.updateHUD();
+        wizard2.updateHUD();
 
 
 

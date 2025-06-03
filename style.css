@@ -27,10 +27,20 @@ label{
     border-radius: 0.25rem;
 }
 .hpBar div{
-    background-color: green;
     height: 100%;
 }
 
 .text-green{
     color: green;
+}
+
+.bg-green{
+    background-color: green;
+}
+
+.bg-orange{
+    background-color: orange;
+}
+.bg-red{
+    background-color: red;
 }
